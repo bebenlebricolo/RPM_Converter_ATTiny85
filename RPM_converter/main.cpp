@@ -148,7 +148,10 @@ ISR(INT0_vect)
 // This piece of code is used to compute the period of each pulse train.
 void compute_period()
 {
-	cur_period = pulse_counter_reset_time / (pulse_count / MAGNET_NB) ;
+	if(pulse_count != 0){
+		cur_period = pulse_counter_reset_time / (pulse_count / MAGNET_NB) ;
+	}
+	pulse_count=0;
 }
 
 
