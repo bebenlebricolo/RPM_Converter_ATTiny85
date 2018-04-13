@@ -63,9 +63,9 @@ C_DEPS_AS_ARGS +=  \
 main.d \
 Time_related.d
 
-OUTPUT_FILE_PATH +=RPM_converter_v0.2.elf
+OUTPUT_FILE_PATH +=RPM_converter.elf
 
-OUTPUT_FILE_PATH_AS_ARGS +=RPM_converter_v0.2.elf
+OUTPUT_FILE_PATH_AS_ARGS +=RPM_converter.elf
 
 ADDITIONAL_DEPENDENCIES:=
 
@@ -114,13 +114,13 @@ all: $(OUTPUT_FILE_PATH) $(ADDITIONAL_DEPENDENCIES)
 $(OUTPUT_FILE_PATH): $(OBJS) $(USER_OBJS) $(OUTPUT_FILE_DEP) $(LIB_DEP) $(LINKER_SCRIPT_DEP)
 	@echo Building target: $@
 	@echo Invoking: AVR8/GNU Linker : 5.4.0
-	$(QUOTE)D:\Installed Programs\Atmel\Atmel Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-g++.exe$(QUOTE) -o$(OUTPUT_FILE_PATH_AS_ARGS) $(OBJS_AS_ARGS) $(USER_OBJS) $(LIBS) -Wl,-Map="RPM_converter_v0.2.map" -Wl,--start-group -Wl,-lm  -Wl,--end-group -Wl,--gc-sections -mmcu=attiny85 -B "D:\Installed Programs\Atmel\Atmel Studio\7.0\Packs\atmel\ATtiny_DFP\1.3.147\gcc\dev\attiny85"  
+	$(QUOTE)D:\Installed Programs\Atmel\Atmel Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-g++.exe$(QUOTE) -o$(OUTPUT_FILE_PATH_AS_ARGS) $(OBJS_AS_ARGS) $(USER_OBJS) $(LIBS) -Wl,-Map="RPM_converter.map" -Wl,--start-group -Wl,-lm  -Wl,--end-group -Wl,--gc-sections -mmcu=attiny85 -B "D:\Installed Programs\Atmel\Atmel Studio\7.0\Packs\atmel\ATtiny_DFP\1.3.147\gcc\dev\attiny85"  
 	@echo Finished building target: $@
-	"D:\Installed Programs\Atmel\Atmel Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-objcopy.exe" -O ihex -R .eeprom -R .fuse -R .lock -R .signature -R .user_signatures  "RPM_converter_v0.2.elf" "RPM_converter_v0.2.hex"
-	"D:\Installed Programs\Atmel\Atmel Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-objcopy.exe" -j .eeprom  --set-section-flags=.eeprom=alloc,load --change-section-lma .eeprom=0  --no-change-warnings -O ihex "RPM_converter_v0.2.elf" "RPM_converter_v0.2.eep" || exit 0
-	"D:\Installed Programs\Atmel\Atmel Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-objdump.exe" -h -S "RPM_converter_v0.2.elf" > "RPM_converter_v0.2.lss"
-	"D:\Installed Programs\Atmel\Atmel Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-objcopy.exe" -O srec -R .eeprom -R .fuse -R .lock -R .signature -R .user_signatures "RPM_converter_v0.2.elf" "RPM_converter_v0.2.srec"
-	"D:\Installed Programs\Atmel\Atmel Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-size.exe" "RPM_converter_v0.2.elf"
+	"D:\Installed Programs\Atmel\Atmel Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-objcopy.exe" -O ihex -R .eeprom -R .fuse -R .lock -R .signature -R .user_signatures  "RPM_converter.elf" "RPM_converter.hex"
+	"D:\Installed Programs\Atmel\Atmel Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-objcopy.exe" -j .eeprom  --set-section-flags=.eeprom=alloc,load --change-section-lma .eeprom=0  --no-change-warnings -O ihex "RPM_converter.elf" "RPM_converter.eep" || exit 0
+	"D:\Installed Programs\Atmel\Atmel Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-objdump.exe" -h -S "RPM_converter.elf" > "RPM_converter.lss"
+	"D:\Installed Programs\Atmel\Atmel Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-objcopy.exe" -O srec -R .eeprom -R .fuse -R .lock -R .signature -R .user_signatures "RPM_converter.elf" "RPM_converter.srec"
+	"D:\Installed Programs\Atmel\Atmel Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-size.exe" "RPM_converter.elf"
 	
 	
 
@@ -132,5 +132,5 @@ $(OUTPUT_FILE_PATH): $(OBJS) $(USER_OBJS) $(OUTPUT_FILE_DEP) $(LIB_DEP) $(LINKER
 clean:
 	-$(RM) $(OBJS_AS_ARGS) $(EXECUTABLES)  
 	-$(RM) $(C_DEPS_AS_ARGS)   
-	rm -rf "RPM_converter_v0.2.elf" "RPM_converter_v0.2.a" "RPM_converter_v0.2.hex" "RPM_converter_v0.2.lss" "RPM_converter_v0.2.eep" "RPM_converter_v0.2.map" "RPM_converter_v0.2.srec" "RPM_converter_v0.2.usersignatures"
+	rm -rf "RPM_converter.elf" "RPM_converter.a" "RPM_converter.hex" "RPM_converter.lss" "RPM_converter.eep" "RPM_converter.map" "RPM_converter.srec" "RPM_converter.usersignatures"
 	

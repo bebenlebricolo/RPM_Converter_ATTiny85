@@ -107,6 +107,7 @@ uint32_t date::convert_to_ms()
 {
 	uint32_t result = 0;
 	result = ms + 1000*(second + 60*(minute + 24*(hour)));
+	return result;
 }
 
 //////////////////////////////////////////////////////////////////////////

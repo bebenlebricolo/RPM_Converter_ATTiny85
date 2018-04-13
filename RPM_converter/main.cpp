@@ -1,13 +1,14 @@
 /*
  * RPM_Converter.cpp
  *
- * Created: 25/10/2017 11:34:11
+ * First Created: 25/10/2017 11:34:11
  * Author : Bebenlebricolo
  * 
  * Versions | Release Date  | Comments
  * *****************************
  *    0.1      25/10/2017     First Release (triggers on rising edge only) -> drives a galvanometer correctly with a clean signal (e.g. generated with a variable PWM generator)
- *    0.2                    
+ *    0.2      14/01/2018	  Implemented tools to find pulses center and compute period
+ *    0.3      13/04/2018     Try another approach -> counting how many pulses were seen in a fixed amount of time           
  */
 
 
@@ -29,7 +30,7 @@
  
  */
  
-#define MAX_SAVG 5        // Maximum size of the Sliding Average array
+#define MAX_SAVG 1        // Maximum size of the Sliding Average array
 #define F_CPU 8000000UL    // Base clock frequency (internal, 8 MHz, non divided)
 
 #define MAGNET_NB 2        // Number of magnets used for one revolution
@@ -53,17 +54,21 @@
 const uint16_t MIN_period = (float)60/MAXRPM*1000;  // MAXRPM = 9000 -> min_period = 6 ms
 const uint16_t MAX_period = (float)60/MINRPM*1000;  // MINRPM = 500  -> max_period = 120 ms
 
+// time length of one counting session in milliseconds ( 1/4 of a second )
+const uint16_t pulse_counter_reset_time = 250; 
+
 const uint16_t DAC_Frequency = 1000;  // 1kHz sampling rate
 
 // PWM output signal variables
-volatile uint8_t pulse_index = 0;     // Holds the current number of pulse detected
+// Version 0.2 pulse_index variable not used in v 0.3
+// volatile uint8_t pulse_index = 0;     // Holds the current number of pulse detected
 volatile uint8_t cur_period_index = 0;    // current period index (in the array of calculated periods)
-volatile uint32_t cur_period = 0;     // Holds the currently calculated period
-volatile uint8_t duty_cycle = 0;      // Holds the current duty cycle  value ( 0 - 100 )
+volatile uint32_t cur_period = 0;     // Holds the currently calculated period (milliseconds)
 volatile uint8_t s_avg_array[MAX_SAVG];   // Array holding the periods calculated and used to compute the sliding average
 volatile uint8_t avg_period = 0;      // Result of moving average
 volatile uint32_t sum_period = 0;     // Sum of period values stored in the array s_avg_array
-volatile uint16_t cur_voltage = 0;      // Currently aimed output voltage
+// To be implemented when voltage sensing is required
+//volatile uint16_t cur_voltage = 0;      // Currently aimed output voltage
 volatile uint8_t cur_duty_cycle = 0;    // Currently used duty cycle (0 - 255) -> 8 bit Timer resolution
 
 const uint8_t MIN_DUTY = 0;         // Determines the minimum Duty cycle resolution (number of 'Ticks')
@@ -76,11 +81,9 @@ volatile date detection_time_buffer;	// Holds current time of detection (either 
 volatile uint8_t rising_edge_detected = 0;	// Binary detection witnesses (1 = detected, 0 = nothing detected)
 volatile uint8_t falling_edge_detected = 0;
 
-date rising_time;		// Rising and falling edges times
-date falling_time;		
-date date_period;
-date old_time ;        // Variables holding the old cur_time.ms value
-date new_time ;
+volatile uint16_t pulse_count = 0;
+volatile uint8_t pulse_counter_resets = 0;
+
 
 // Initialize the s_avg_array
 void init_array(void)
@@ -137,79 +140,15 @@ uint16_t interpol(uint16_t X, uint16_t start_in, uint16_t end_in,uint16_t start_
 // Increments on falling edge
 ISR(INT0_vect)
 {
-		// Do some detection only on the very first pulse of a pulse train
-		if(pulse_index == 0)
-		{
-			if((PINB & 0b00000100) != 0) 
-			{
-				//cur_duty_cycle++;
-				rising_edge_detected = 1;
-				falling_edge_detected = 0;
-				detection_time_buffer = cur_time;	// volatile date = volatile date assignment operator invoked
-			}
-			else
-			{	// falling edge
-				falling_edge_detected = 1;
-				rising_edge_detected = 0;
-				detection_time_buffer = cur_time;	// volatile date = volatile date assignment operator invoked
-			}		
-															//				 1rst pulse train start
-															//				 |				 2nd pulse train start
-															//				 ?				 ?
-		}											//	pulse number : 		 0       1       0       1
-	//											input signal 				_|¯¯¯|___|¯¯¯¯|__|¯¯¯|___|¯¯¯¯|_
-	if((PINB & 0b00000100) == 0)  // detecting falling edge						   ¦			   ¦
-	{													//					       ?-----period----?
-		++pulse_index;									//					       |				Center of pulse 0
-		pulse_index %= MAGNET_NB;						//				           Center of pulse 0
-	}	
+	if((PINB & ( 1 << 2 ) ) != 0) {
+		pulse_count++;
+	}
 }
 
 // This piece of code is used to compute the period of each pulse train.
 void compute_period()
 {
-	// if we have detected a rising or falling edge 
-	if(pulse_index == 0)
-	{
-			if(rising_edge_detected)
-			{
-				// Store rising edge time
-				rising_time = detection_time_buffer;
-				// reset triggers
-				rising_edge_detected = 0;
-				falling_edge_detected = 0;
-			}
-	}
-	if(pulse_index == 1)
-	{
-			if(falling_edge_detected)
-			{
-				falling_edge_detected = 0;
-				rising_edge_detected = 0;
-				falling_time = detection_time_buffer;		// Extract falling_time from time buffer
-				new_time = find_middle(rising_time,falling_time) ;	// Find the center of the pulse (in time)
-				//rising_time.reset();	// Then reset rising and falling edges time buffers
-				//falling_time.reset();
-			
-				date_period = new_time - old_time;	// Compute the length between to "starts" of pulses train
-				// Computes the currently calculated period
-				cur_period = date_period.ms + 1000 * date_period.second;
-				// and stores back the timing of this current pulse (which would be the "old" one at next triggering)
-				old_time = new_time;
-				// Implementation of a regular filter.
-				if(cur_period > MIN_period && cur_period < MAX_period)
-				{
-					push_period(cur_period);
-				}
-				else
-				{
-					if(cur_period < MIN_period) cur_period = MIN_period;
-					if(cur_period > MAX_period) cur_period = MAX_period;
-					push_period(cur_period);
-				}
-			}
-		}
-	
+	cur_period = pulse_counter_reset_time / (pulse_count / MAGNET_NB) ;
 }
 
 
@@ -241,6 +180,10 @@ void init_PWM_OUT(void){
 ISR(TIMER0_COMPA_vect)
 {
    cur_time.inc_ms(); // add one millisecond
+   if(cur_time.ms > pulse_counter_reset_time){
+	   cur_time.ms = 0;
+	   pulse_counter_resets++;
+   }
  }
 
 // Timer 1 sets the output port to high state when it overflows
@@ -288,9 +231,13 @@ int main(void)
       sei();
     while (1) 
     {
-		compute_period();
+		if(pulse_counter_resets != 0){
+			compute_period();
+			push_period(cur_period);
+			pulse_counter_resets = 0 ;
+		}
+		
 		cur_duty_cycle = interpol(avg_period, MAX_period, MIN_period, 0 , 250 );
-		//cur_duty_cycle = 50;
     }
 }
 
