@@ -1,0 +1,11 @@
+$repeat 50
+		PINB |= 0b00000100	// Rising edge
+		// clock : 8 Mhz -> 1 clock cycle = 125 ns
+		// 1ms = 8000 clock cycles
+		//  10 ms = 8 * 1000
+		#80000			// wait 10 ms
+		$break
+		PINB &= 0b11111011	// Falling edge
+		#200000			// wait 25 ms
+		$break
+$endrep
