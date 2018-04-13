@@ -1,2 +1,3 @@
 # ignore the .vs metadata directory
 .vs/
+*.vs
