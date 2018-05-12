@@ -85,7 +85,7 @@ LINKER_SCRIPT_DEP+=
 ./%.o: .././%.cpp
 	@echo Building file: $<
 	@echo Invoking: AVR8/GNU C Compiler : 5.4.0
-	$(QUOTE)D:\Installed Programs\Atmel\Atmel Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-g++.exe$(QUOTE) -funsigned-char -funsigned-bitfields -DNDEBUG  -I"D:\Installed Programs\Atmel\Atmel Studio\7.0\Packs\atmel\ATtiny_DFP\1.3.147\include"  -Os -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -Wall -mmcu=attiny85 -B "D:\Installed Programs\Atmel\Atmel Studio\7.0\Packs\atmel\ATtiny_DFP\1.3.147\gcc\dev\attiny85" -c -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	$(QUOTE)D:\Installed Programs\Atmel\Atmel Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-g++.exe$(QUOTE) -funsigned-char -funsigned-bitfields -DNDEBUG  -I"D:\Installed Programs\Atmel\Atmel Studio\7.0\Packs\atmel\ATtiny_DFP\1.3.147\include"  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -Wall -mmcu=attiny85 -B "D:\Installed Programs\Atmel\Atmel Studio\7.0\Packs\atmel\ATtiny_DFP\1.3.147\gcc\dev\attiny85" -c -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 

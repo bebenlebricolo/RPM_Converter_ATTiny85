@@ -17,8 +17,8 @@ REM Useful link for fuses : http://www.engbedded.com/fusecalc
 
 set AVRDUDE_PATH="D:\Installed Programs\Arduino\hardware\tools\avr\bin\avrdude"
 set AVRDUDE_CONF="D:\Installed Programs\Arduino\hardware\tools\avr\etc\avrdude.conf"
-set PORT=PCOM10
-set HEX_PATH="D:\Dossier Perso\Programmation\AtmelStudio\RPM_Converter\ATTiny85_Binaries\RPM_Converter.hex"
+set PORT=PCOM3
+set HEX_PATH="D:\Dossier Perso\Programmation\AtmelStudio\RPM_Converter\RPM_converter\Release\RPM_Converter.hex"
 
 @echo on
 
