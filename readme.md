@@ -17,6 +17,8 @@ The chip interpretes a square wave pattern coming from a Hall Sensor, mounted in
 This pattern is then translated into RPM values, which are fed into a PWM synthesiser (using Timers) to emulate a Digital to Analog Converter.
 The output signal is then fed into a single transistor, regulated with a capacitor, and finally enters the car's galvanometer.
 
+For more details on how the signal is interpreted internally, please refer to the Wiki section of this repo : ![wiki home page](https://github.com/bebenlebricolo/RPM_Converter_ATTiny85/wiki)
+
 #### Mechanical setup
 The cranckshaft has two magnets mounted in the center of the cranckshaft's pulley.
 I designed a special mounting system to fill that purpose, but it may largely differ from a car to another.
@@ -37,5 +39,14 @@ To flash the hexfile, I've written a simple .batch script that one can use to wr
 [Youtube - How To: Using Stimuli in Simulations with Atmel Studio](https://www.youtube.com/watch?v=5kF-Y8q7e9k)
 To do so, remember to build your project under the <Debug> configuration, then launch the debug session and attach the stimuli file under **_>debug>use stimuli file_**
 
+## Electric setup
+Here below is a picture of the outpur circuitry which is used to drive the galvanometer. The input (Pulse generator) of the circuit is used to simulate the direct output of the ATtiny85 (Pulse Width Modulated signal).
+Its output signal is protected by a 1kOhm resistor (preventing output port overloading) and is then fed to a regular NPN transistor working in chopping mode.
+![Digital to Analog Converter PWM output circuitry](https://github.com/bebenlebricolo/RPM_Converter_ATTiny85/blob/master/Screenshots/DAC%20circuitry.PNG)
+
+The output of the emitter is then filtered and regulated by a high value capacitor before being fed to the galvanometer's input (which is only a coil with an internal resistance of 107 Ohms)
 #### TODO : add schematics and documentation
-- [ ] Add electronic schematics
+- [x] Add electronic schematics
+- [ ] Provide feedback voltage sensing of the output for calibration purposes?
+- [ ] Implement more advanced mathematics (predict the new output earlier in the computation loop)
+- [ ] Write the wiki !
